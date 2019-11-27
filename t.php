@@ -11,10 +11,11 @@ require_once 'AliDysms.php';
 $cfg = json_decode(file_get_contents('.cfg'), true);
 
 try {
-    $sms = new AliDysms();
+    $sms = new AliDysms($cfg['accessKeyId'], $cfg['accessKeySecret']);
 
-    $sms->send('13812341234', 'SMS_153055065', '{"code":"1111"}');
-    $result = $sms->sendVerifyCode('13812341234');
+    $result = $sms->getDetails('13812341234', '20191127');
+
+    var_dump($result);
 } catch (Exception $exception) {
     echo 'Code: ', $exception->getCode(), "\n";
     echo 'Error: ', $exception->getMessage(), "\n";

@@ -184,14 +184,8 @@ class AliDysms
         $baseParams['SignatureNonce'] = md5(uniqid(mt_rand(), true));
         $baseParams['Timestamp'] = gmdate($this->dateTimeFormat);
 
-        $options = $this->options;
-
-        if (!isset($options['SignName']) && $this->signName) {
-            $options['SignName'] = $this->signName;
-        }
-
         // 如果请求参数中包含有公共参数中的字段，则保留请求参数中的字段。
-        $options = array_merge($options, $baseParams);
+        $options = array_merge($this->options, $baseParams);
 
         unset($options['Signature']);
 
@@ -261,6 +255,8 @@ class AliDysms
      */
     public function send($phone_numbers, $template_code, $template_param = null, $out_id = null)
     {
+        $this->setAction('SendSms');
+
         if (is_array($phone_numbers)) {
             $phone_numbers = join(',', $phone_numbers);
         }
@@ -314,6 +310,36 @@ class AliDysms
         }
 
         return false;
+    }
+
+    /**
+     * 查询短信发送记录和发送状态。
+     *
+     * @param string $phone_number 手机号码。
+     * @param string $send_date    日期格式，格式为 yyyyMMdd ，例如 20181225 ，可查询最近 30 天内的记录。
+     * @param int $current_page    当前页码。
+     * @param int $page_size       每页记录数量，取值范围为 1~50 。
+     * @param null|string $biz_id  发送回执 ID 。
+     *
+     * @return bool|mixed|string
+     * @throws Exception
+     */
+    public function getDetails($phone_number, $send_date, $current_page = 1, $page_size = 10, $biz_id = null)
+    {
+        $this->setAction('QuerySendDetails');
+
+        $this->setOptions([
+            'CurrentPage' => $current_page,
+            'PageSize' => $page_size,
+            'PhoneNumber' => $phone_number,
+            'SendDate' => $send_date,
+        ]);
+
+        if ($biz_id) {
+            $this->setOption('BizId', $biz_id);
+        }
+
+        return $this->execute();
     }
 
     /**

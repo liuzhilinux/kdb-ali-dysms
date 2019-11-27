@@ -83,7 +83,7 @@ $sms->setOption('TemplateCode', 'SMS_153055065');
 
 
 
-## 进阶使用
+### 进阶使用
 
 当然，还有更简单的使用方法，如果你已经改写了模块的构造器，使其初始化模块对象的时候加载了配置，那么，调用以上接口可以更简单，代码如下：
 
@@ -121,9 +121,31 @@ $sms->send($phoneNumbers, 'SMS_153055065', $templateParam);
 
 ```php
 $result = $sms->sendVerifyCode('13812341234');
+
+// 手机号码：
+$result['phone_number'];
+// 生成的验证码：
+$result['verify_code'];
 ```
 
 就是这么简单。
+
+
+
+### 查看短信发送状态
+
+```php
+try {
+    $sms = new AliDysms($cfg['accessKeyId'], $cfg['accessKeySecret']);
+
+    $result = $sms->getDetails('13812341234', '20191127');
+
+    var_dump($result);
+} catch (Exception $exception) {
+    echo 'Code: ', $exception->getCode(), "\n";
+    echo 'Error: ', $exception->getMessage(), "\n";
+}
+```
 
 
 
