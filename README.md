@@ -83,7 +83,39 @@ $sms->setOption('TemplateCode', 'SMS_153055065');
 
 
 
+## 进阶使用
 
+当然，还有更简单的使用方法，如果你已经改写了模块的构造器，使其初始化模块对象的时候加载了配置，那么，调用以上接口可以更简单，代码如下：
+
+```php
+try {
+    $sms = new AliDysms();
+
+    $sms->send('13812341234', 'SMS_153055065', '{"code":"1111"}');
+} catch (Exception $exception) {
+    echo 'Code: ', $exception->getCode(), "\n";
+    echo 'Error: ', $exception->getMessage(), "\n";
+}
+```
+
+实现一样的功能。
+
+同时， `send` 方法支持群发短信，代码如下：
+
+```php
+// 逗号分隔的字符串。
+$phoneNumbers = '13812341234,1581234234';
+$sms->send($phoneNumbers, 'SMS_153055065', '{"code":"1111"}');
+
+// 数组格式。
+$phoneNumbers = ['13812341234','1581234234'];
+$sms->send($phoneNumbers, 'SMS_153055065', '{"code":"1111"}');
+
+// 接口请求参数支持数组。
+$phoneNumbers = ['13812341234','1581234234'];
+$templateParam = ['code' => '1111'];
+$sms->send($phoneNumbers, 'SMS_153055065', $templateParam);
+```
 
 
 

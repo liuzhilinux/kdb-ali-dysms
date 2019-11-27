@@ -104,10 +104,22 @@ class AliDysms
      * @param string $access_key_id     访问密钥 ID 。
      * @param string $access_key_secret 访问密钥。
      */
-    public function __construct($access_key_id, $access_key_secret)
+    public function __construct($access_key_id = null, $access_key_secret = null)
     {
-        $this->accessKeyId = $access_key_id;
-        $this->accessKeySecret = $access_key_secret;
+        // 在这里读取配置文件，初始化配置。
+        // $this->signName = '';
+        // $this->accessKeyId = '';
+        // $this->accessKeySecret = '';
+        // $this->verifyPhoneTemplateCode = '';
+        // $this->verifyPhoneTemplateField = '';
+
+        if ($access_key_id) {
+            $this->accessKeyId = $access_key_id;
+        }
+
+        if ($access_key_secret) {
+            $this->accessKeySecret = $access_key_secret;
+        }
     }
 
     /**
@@ -172,8 +184,14 @@ class AliDysms
         $baseParams['SignatureNonce'] = md5(uniqid(mt_rand(), true));
         $baseParams['Timestamp'] = gmdate($this->dateTimeFormat);
 
+        $options = $this->options;
+
+        if (!isset($options['SignName']) && $this->signName) {
+            $options['SignName'] = $this->signName;
+        }
+
         // 如果请求参数中包含有公共参数中的字段，则保留请求参数中的字段。
-        $options = array_merge($this->options, $baseParams);
+        $options = array_merge($options, $baseParams);
 
         unset($options['Signature']);
 
@@ -230,6 +248,41 @@ class AliDysms
         return $res;
     }
 
+    /**
+     * 发送短信。
+     *
+     * @param array|string $phoneNumbers 手机号码，支持多个号码，多个号码字符串以英文半角逗号（ , ）隔开，支持数组。
+     * @param string $templateCode       短信模板 ID 。
+     * @param string/array|null $templateParam 短信模板变量对应的实际值，支持 json 字符串，如果传入数组，则进行 json 编码。
+     * @param null $outId                外部流水扩展字段。
+     *
+     * @return bool|mixed|string
+     * @throws Exception
+     */
+    public function send($phoneNumbers, $templateCode, $templateParam = null, $outId = null)
+    {
+        if (is_array($phoneNumbers)) {
+            $phoneNumbers = join(',', $phoneNumbers);
+        }
+
+        $this->setOptions([
+            'PhoneNumbers' => $phoneNumbers,
+            'SignName' => $this->signName,
+            'TemplateCode' => $templateCode,
+        ]);
+
+        if (is_string($templateParam)) {
+            $this->setOption('TemplateParam', $templateParam);
+        } elseif (is_array($templateParam)) {
+            $this->setOption('TemplateParam', json_encode($templateParam, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        }
+
+        if (is_string($outId)) {
+            $this->setOption('OutId', $outId);
+        }
+
+        return $this->execute();
+    }
 
     /**
      * 根据 POP 规则对要签名的字符串进行编码。
