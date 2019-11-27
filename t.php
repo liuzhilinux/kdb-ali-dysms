@@ -14,6 +14,7 @@ try {
     $sms = new AliDysms();
 
     $sms->send('13812341234', 'SMS_153055065', '{"code":"1111"}');
+    $result = $sms->sendVerifyCode('13812341234');
 } catch (Exception $exception) {
     echo 'Code: ', $exception->getCode(), "\n";
     echo 'Error: ', $exception->getMessage(), "\n";

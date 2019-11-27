@@ -251,37 +251,69 @@ class AliDysms
     /**
      * 发送短信。
      *
-     * @param array|string $phoneNumbers 手机号码，支持多个号码，多个号码字符串以英文半角逗号（ , ）隔开，支持数组。
-     * @param string $templateCode       短信模板 ID 。
+     * @param array|string $phone_numbers 手机号码，支持多个号码，多个号码字符串以英文半角逗号（ , ）隔开，支持数组。
+     * @param string $template_code       短信模板 ID 。
      * @param string/array|null $templateParam 短信模板变量对应的实际值，支持 json 字符串，如果传入数组，则进行 json 编码。
-     * @param null $outId                外部流水扩展字段。
+     * @param null $out_id                外部流水扩展字段。
      *
      * @return bool|mixed|string
      * @throws Exception
      */
-    public function send($phoneNumbers, $templateCode, $templateParam = null, $outId = null)
+    public function send($phone_numbers, $template_code, $template_param = null, $out_id = null)
     {
-        if (is_array($phoneNumbers)) {
-            $phoneNumbers = join(',', $phoneNumbers);
+        if (is_array($phone_numbers)) {
+            $phone_numbers = join(',', $phone_numbers);
         }
 
         $this->setOptions([
-            'PhoneNumbers' => $phoneNumbers,
+            'PhoneNumbers' => $phone_numbers,
             'SignName' => $this->signName,
-            'TemplateCode' => $templateCode,
+            'TemplateCode' => $template_code,
         ]);
 
-        if (is_string($templateParam)) {
-            $this->setOption('TemplateParam', $templateParam);
-        } elseif (is_array($templateParam)) {
-            $this->setOption('TemplateParam', json_encode($templateParam, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
+        if (is_string($template_param)) {
+            $this->setOption('TemplateParam', $template_param);
+        } elseif (is_array($template_param)) {
+            $this->setOption('TemplateParam', json_encode($template_param, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE));
         }
 
-        if (is_string($outId)) {
-            $this->setOption('OutId', $outId);
+        if (is_string($out_id)) {
+            $this->setOption('OutId', $out_id);
         }
 
         return $this->execute();
+    }
+
+    /**
+     * 发送短信验证码。
+     *
+     * @param string $phone_number 手机号码。
+     * @param int $digit           短信验证码位数，默认 6 位。
+     *
+     * @return bool|mixed|string
+     * @throws Exception
+     */
+    public function sendVerifyCode($phone_number, $digit = 6)
+    {
+        // 生成指定位数的短信验证码。
+        $verify_code = '';
+
+        for ($i = 0; $i < intval($digit); $i++) $verify_code .= mt_rand(0, 9);
+
+
+        $response = $this->send(
+            $phone_number,
+            $this->verifyPhoneTemplateCode,
+            [$this->verifyPhoneTemplateField => $verify_code]
+        );
+
+        if ($response['code'] === 'OK' && $response['message'] === 'OK') {
+            $response['phone_number'] = $phone_number;
+            $response['verify_code'] = $verify_code;
+            return $response;
+        }
+
+        return false;
     }
 
     /**

@@ -117,7 +117,13 @@ $templateParam = ['code' => '1111'];
 $sms->send($phoneNumbers, 'SMS_153055065', $templateParam);
 ```
 
+很明显的看出，上述需求是发送短信验证码，那么这个模块提供了一个专用的方法 `sendVerifyCode` 用来发送短信验证码，代码如下：
 
+```php
+$result = $sms->sendVerifyCode('13812341234');
+```
+
+就是这么简单。
 
 
 
