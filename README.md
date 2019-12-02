@@ -10,9 +10,9 @@
 ## 资源
 
 * 官方文档：[ 短信服务-阿里云 ]( https://help.aliyun.com/product/44282.html, "短信服务-阿里云-官方文档")
-* 在线调试：[OpenAPI Explorer]( https://api.aliyun.com/?spm=a2c4g.11186623.2.13.2fe04e6akedeOC#/?product=Dysmsapi&lang=PHP ,"OpenAPI Explorer")
-* 官方 PHP SDK：[aliyun/openapi-sdk-php-client: Official repository of the Alibaba Cloud Client for PHP]( https://github.com/aliyun/openapi-sdk-php-client ,"新版 SDK")
-* 旧版 PHP SDK：[ aliyun/aliyun-openapi-php-sdk: Open API SDK for php developers ]( https://github.com/aliyun/aliyun-openapi-php-sdk ,"旧版 SDK")
+* 在线调试：[OpenAPI Explorer]( https://api.aliyun.com/?spm=a2c4g.11186623.2.13.2fe04e6akedeOC#/?product=Dysmsapi&lang=PHP, "OpenAPI Explorer")
+* 官方 PHP SDK：[aliyun/openapi-sdk-php-client: Official repository of the Alibaba Cloud Client for PHP]( https://github.com/aliyun/openapi-sdk-php-client, "新版 SDK")
+* 旧版 PHP SDK：[ aliyun/aliyun-openapi-php-sdk: Open API SDK for php developers ]( https://github.com/aliyun/aliyun-openapi-php-sdk, "旧版 SDK")
 
 ## 开始使用
 
