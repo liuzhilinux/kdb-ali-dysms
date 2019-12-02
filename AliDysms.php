@@ -4,6 +4,7 @@
  * 阿里云 - 短信服务功能模块。
  * Class AliDysms
  */
+
 class AliDysms
 {
     /**
@@ -150,6 +151,18 @@ class AliDysms
     }
 
     /**
+     * 查看是否存在某参数。
+     *
+     * @param string $key 参数名。
+     *
+     * @return bool
+     */
+    public function hasOption($key)
+    {
+        return isset($this->options[$key]);
+    }
+
+    /**
      * 批量设置参数。
      *
      * @param array $options 参数数组。
@@ -172,7 +185,7 @@ class AliDysms
      * 执行请求。
      *
      * @return bool|mixed|string
-     * @throws Exception
+     * @throws \Exception
      */
     public function execute()
     {
@@ -232,7 +245,7 @@ class AliDysms
 
         $res = json_decode($res, true);
 
-        if (200 != $status) {
+        if (200 != $status || 'OK' != $res['Code']) {
             throw new \Exception('ERR[' . $res['Code'] . ']: ' . $res['Message']);
         }
 
@@ -248,12 +261,13 @@ class AliDysms
      * @param array|string $phone_numbers 手机号码，支持多个号码，多个号码字符串以英文半角逗号（ , ）隔开，支持数组。
      * @param string $template_code       短信模板 ID 。
      * @param string/array|null $templateParam 短信模板变量对应的实际值，支持 json 字符串，如果传入数组，则进行 json 编码。
+     * @param string $sign_name           短信签名名称。
      * @param null $out_id                外部流水扩展字段。
      *
      * @return bool|mixed|string
-     * @throws Exception
+     * @throws \Exception
      */
-    public function send($phone_numbers, $template_code, $template_param = null, $out_id = null)
+    public function send($phone_numbers, $template_code, $template_param = null, $sign_name = null, $out_id = null)
     {
         $this->setAction('SendSms');
 
@@ -263,9 +277,16 @@ class AliDysms
 
         $this->setOptions([
             'PhoneNumbers' => $phone_numbers,
-            'SignName' => $this->signName,
             'TemplateCode' => $template_code,
         ]);
+
+        if ($sign_name) {
+            $this->setOption('SignName', $sign_name);
+        }
+
+        if (!$this->hasOption('SignName')) {
+            $this->setOption('SignName', $this->signName);
+        }
 
         if (is_string($template_param)) {
             $this->setOption('TemplateParam', $template_param);
@@ -287,7 +308,7 @@ class AliDysms
      * @param int $digit           短信验证码位数，默认 6 位。
      *
      * @return bool|mixed|string
-     * @throws Exception
+     * @throws \Exception
      */
     public function sendVerifyCode($phone_number, $digit = 6)
     {
@@ -322,7 +343,7 @@ class AliDysms
      * @param null|string $biz_id  发送回执 ID 。
      *
      * @return bool|mixed|string
-     * @throws Exception
+     * @throws \Exception
      */
     public function getDetails($phone_number, $send_date, $current_page = 1, $page_size = 10, $biz_id = null)
     {
@@ -339,6 +360,219 @@ class AliDysms
             $this->setOption('BizId', $biz_id);
         }
 
+        return $this->execute();
+    }
+
+    /**
+     * 编辑短信签名。
+     *
+     * @param string $sign_name     签名名称。
+     * @param int $sign_source      签名来源。
+     * @param string $remark        短信签名申请说明。
+     * @param array $sign_file_list 签名的证明文件。
+     *
+     * @return bool|mixed|string
+     * @throws \Exception
+     */
+    private function editSign($sign_name, $sign_source, $remark, $sign_file_list = [])
+    {
+        $this->setOptions([
+            'SignName' => $sign_name,
+            'SignSource' => $sign_source,
+            'Remark' => $remark,
+        ]);
+
+        if (is_array($sign_file_list)) {
+            $sign_file_list = array_values($sign_file_list);
+
+            foreach ($sign_file_list as $idx => $sign_file) {
+                $this->setOption('SignFileList.' . ($idx + 1) . '.FileSuffix', $sign_file['file_suffix']);
+                $this->setOption('SignFileList.' . ($idx + 1) . '.FileContents', $sign_file['file_contents']);
+            }
+        }
+
+        return $this->execute();
+    }
+
+    /**
+     * 申请短信签名。
+     *
+     * @param string $sign_name     签名名称。
+     * @param int $sign_source      签名来源。其中：
+     *
+     *                                      0：企事业单位的全称或简称。
+     *                                      1：工信部备案网站的全称或简称。
+     *                                      2：APP 应用的全称或简称。
+     *                                      3：公众号或小程序的全称或简称。
+     *                                      4：电商平台店铺名的全称或简称。
+     *                                      5：商标名的全称或简称
+     *
+     * @param string $remark        短信签名申请说明。
+     * @param array $sign_file_list 签名的证明文件。以数组形式传入，格式如下：
+     *
+     *    $sign_file_list = [
+     *       ['file_suffix' => 'jpg','file_contents' => 'R0lGOD...iwAA'],
+     *       ['file_suffix' => 'jpg','file_contents' => 'R0lGOD...iwAA'],
+     *       ['file_suffix' => 'jpg','file_contents' => 'R0lGOD...iwAA'],
+     *       ['file_suffix' => 'jpg','file_contents' => 'R0lGOD...iwAA'],
+     *    ];
+     *
+     * @return bool|mixed|string
+     * @throws \Exception
+     */
+    public function addSign($sign_name, $sign_source, $remark, $sign_file_list = [])
+    {
+        $this->setAction('AddSmsSign');
+        return $this->editSign($sign_name, $sign_source, $remark, $sign_file_list = []);
+    }
+
+    /**
+     * 删除短信签名。
+     *
+     * @param string $sign_name 短信签名。
+     *
+     * @return bool|mixed|string
+     * @throws \Exception
+     */
+    public function deleteSign($sign_name)
+    {
+        $this->setAction('DeleteSmsSign');
+        $this->setOption('SignName', $sign_name);
+        return $this->execute();
+    }
+
+    /**
+     * 修改未审核通过的短信签名，并重新提交审核。
+     *
+     * 参数格式参考 addSign 方法。
+     *
+     * @param string $sign_name     签名名称。
+     * @param int $sign_source      签名来源。
+     * @param string $remark        短信签名申请说明。
+     * @param array $sign_file_list 签名的证明文件。
+     *
+     * @return bool|mixed|string
+     * @throws Exception
+     */
+    public function modifySign($sign_name, $sign_source, $remark, $sign_file_list = [])
+    {
+        $this->setAction('ModifySmsSign');
+        return $this->editSign($sign_name, $sign_source, $remark, $sign_file_list = []);
+    }
+
+    /**
+     * 查询短信签名申请状态。
+     *
+     * @param string $sign_name 短信签名名称。
+     *
+     * @return bool|mixed|string
+     * @throws \Exception
+     */
+    public function getSign($sign_name)
+    {
+        $this->setAction('QuerySmsSign');
+        $this->setOption('SignName', $sign_name);
+        return $this->execute();
+    }
+
+    /**
+     * 编辑短信模板。
+     *
+     * @param string $template_name    模板名称。
+     * @param int $template_type       短信类型。
+     * @param string $template_content 模板内容。
+     * @param string $remark           短信模板申请说明。
+     * @param string $template_code    短信模板 CODE 。
+     *
+     * @return bool|mixed|string
+     * @throws \Exception
+     */
+    private function editTemplate($template_name, $template_type, $template_content, $remark, $template_code = null)
+    {
+        $this->setOptions([
+            'TemplateName' => $template_name,
+            'TemplateType' => intval($template_type),
+            'TemplateContent' => $template_content,
+            'Remark' => $remark,
+        ]);
+
+        if ($template_code) {
+            $this->setOption('TemplateCode', $template_code);
+        }
+
+        return $this->execute();
+    }
+
+    /**
+     * 申请短信模板。
+     *
+     * @param string $template_name    模板名称。
+     * @param int $template_type       短信类型。其中：
+     *
+     *                                  0：验证码。
+     *                                  1：短信通知。
+     *                                  2：推广短信。
+     *                                  3：国际/港澳台消息。
+     *
+     * @param string $template_content 模板内容，长度为 1~500 个字符。
+     * @param string $remark           短信模板申请说明。
+     *
+     * @return bool|mixed|string
+     * @throws \Exception
+     */
+    public function addTemplate($template_name, $template_type, $template_content, $remark)
+    {
+        $this->setAction('AddSmsTemplate');
+        return $this->editTemplate($template_name, $template_type, $template_content, $remark);
+    }
+
+    /**
+     * 删除短信模板。
+     *
+     * @param string $template_code 短信模板 CODE 。
+     *
+     * @return bool|mixed|string
+     * @throws Exception
+     */
+    public function deleteTemplate($template_code)
+    {
+        $this->setAction('DeleteSmsTemplate');
+        $this->setOption('TemplateCode', $template_code);
+        return $this->execute();
+    }
+
+    /**
+     * 修改未通过审核的短信模板。
+     *
+     * 参数格式参考 addTemplate 方法。
+     *
+     * @param string $template_code    短信模板 CODE 。
+     * @param string $template_name    模板名称。
+     * @param int $template_type       短信类型。
+     * @param string $template_content 模板内容，长度为 1~500 个字符。
+     * @param string $remark           短信模板申请说明。
+     *
+     * @return bool|mixed|string
+     * @throws \Exception
+     */
+    public function modifyTemplate($template_code, $template_name, $template_type, $template_content, $remark)
+    {
+        $this->setAction('ModifySmsTemplate');
+        return $this->editTemplate($template_name, $template_type, $template_content, $remark, $template_code);
+    }
+
+    /**
+     * 查询短信模板的审核状态。
+     *
+     * @param string $template_code 短信模板 CODE 。
+     *
+     * @return bool|mixed|string
+     * @throws \Exception
+     */
+    public function getTemplate($template_code)
+    {
+        $this->setAction('QuerySmsTemplate');
+        $this->setOption('TemplateCode', $template_code);
         return $this->execute();
     }
 
