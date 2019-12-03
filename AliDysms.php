@@ -173,7 +173,9 @@ class AliDysms
     public function setOptions($options, $cover = false)
     {
         if ($cover) {
-            $this->options = $options;
+            foreach ($options as $k => $v) {
+                $this->options[$k] = $v;
+            }
         } else {
             $this->options = array_merge($this->options, $options);
         }
