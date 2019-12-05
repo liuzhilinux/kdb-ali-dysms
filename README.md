@@ -168,7 +168,7 @@ $sms->setOptions(['SignName' => '快点办'], true);
 把[什么信息]发送给[那个号码]
 ```
 
-对了，就这两个最关键的点，而其余的诸如设置 `AccessKeyId` 和短信签名等过程难免显得累赘多余，如果多次在不同的地方编写这样的业务代码，不仅使原本简单的代码显得复杂了，而且明显降低了代码的可读性。
+对了，就是这两个最关键的点，而其余的诸如设置 `AccessKeyId` 和短信签名等过程难免显得累赘多余，如果多次在不同的地方编写这样的业务代码，不仅使原本简单的代码显得复杂了，而且明显降低了代码的可读性。
 
 如果你已经改写了模块的构造器，使得在初始化模块对象的时候加载了配置，那么，调用上述接口可以更简单，代码如下：
 
@@ -193,7 +193,7 @@ $phoneNumbers = '13812341234,1581234234';
 $sms->send($phoneNumbers, 'SMS_153055065', '{"code":"1111"}');
 
 // 数组格式。
-$phoneNumbers = ['13812341234','1581234234'];
+$phoneNumbers = ['13812341234', '1581234234'];
 $sms->send($phoneNumbers, 'SMS_153055065', '{"code":"1111"}');
 
 // 接口请求参数支持数组。
@@ -250,18 +250,144 @@ try {
 
 ### 查看短信发送状态
 
+发送短信成功后，我们可以把阿里云服务器返回给我们的发送回执 ID （ `BizId` ）保存下来，下次可以用来查询发送回执。
+
 ```php
 try {
-    $sms = new AliDysms($cfg['accessKeyId'], $cfg['accessKeySecret']);
+    $sms = new AliDysms();
 
+    // 最简单的方法，给出手机号码和要查询记录的时间，
+    // 时间格式： date('Ymd', $timestamp);
     $result = $sms->getDetails('13812341234', '20191127');
 
+    // 其中，$result['TotalCount']表示记录总数，如果记录数量较多，可以分页查询。
     var_dump($result);
+
+    // 下面的例子表示查询第二页记录，每页 50 条。
+    // 默认值为第一页，每页 10 条。
+    $result = $sms->getDetails('13812341234', '20191127', 2, 50);
+
+	// 如果有保存 BizId ,可以补充在最后，表示查询某个批次的记录。
+    $result = $sms->getDetails('13812341234', '20191127', 1, 10, '123456^123');
+
 } catch (Exception $exception) {
     echo 'Code: ', $exception->getCode(), "\n";
     echo 'Error: ', $exception->getMessage(), "\n";
 }
 ```
+
+
+
+### 短信签名
+
+#### 申请短信签名
+
+```php
+AliDysms::addSign(
+    string $sign_name,             // 签名名称
+    int $sign_source,              // 签名来源
+    string $remark                 // 短信签名申请说明
+    [, array $sign_file_list = []] // 签名的证明文件
+):array
+```
+
+以上参数中，签名来源取值范围：
+
+- 0：企事业单位的全称或简称。
+- 1：工信部备案网站的全称或简称。
+- 2：APP应用的全称或简称。
+- 3：公众号或小程序的全称或简称。
+- 4：电商平台店铺名的全称或简称。
+- 5：商标名的全称或简称。
+
+特定情况下要上传证明文件，其中，文件格式：
+
+```php
+// file_suffix 表示图片格式，支持 ['jpg', 'png', 'gif', 'jpeg'] 。
+// file_contents 表示 base64 编码后的图片，每张图片大小限制在 2MB 内。
+$sign_file_list = [
+   ['file_suffix' => 'jpg','file_contents' => 'R0lGOD...iwAA'],
+   ['file_suffix' => 'jpg','file_contents' => 'R0lGOD...iwAA'],
+   ['file_suffix' => 'jpg','file_contents' => 'R0lGOD...iwAA'],
+   ['file_suffix' => 'jpg','file_contents' => 'R0lGOD...iwAA'],
+];
+```
+
+
+
+#### 删除短信签名
+
+```php
+AliDysms::deleteSign(string $sign_name):array
+```
+
+
+
+#### 修改未审核通过的短信签名，并重新提交审核
+
+```php
+// 和申请短信签名的参数一致。
+AliDysms::modifySign(string $sign_name, int $sign_source, 
+             string $remark[, array $sign_file_list = []]):array
+```
+
+
+
+#### 查询短信签名申请状态
+
+```php
+AliDysms::getSign(string $sign_name):array
+```
+
+
+
+### 短信模板
+
+#### 申请短信模板
+
+```php
+AliDysms::addTemplate(
+    string $template_name,      // 模板名称
+    int $template_type,         // 短信类型
+    string $template_content,   // 模板内容
+    string $remark              // 短信模板申请说明
+):array
+```
+
+
+
+#### 删除短信模板
+
+```php
+AliDysms::deleteTemplate(
+    string $template_code  // 短信模板 CODE
+):array
+```
+
+
+
+#### 修改未通过审核的短信模板
+
+```php
+// 第一个参数为短信模板 CODE ，其余参数和申请短信模板的参数一致。
+AliDysms::modifyTemplate(
+    string $template_code, 
+    string $template_name, 
+    int $template_type, 
+    string $template_content, 
+    string $remark
+):array
+```
+
+
+
+#### 查询短信模板的审核状态
+
+```php
+AliDysms::getTemplate(string $template_code):array
+```
+
+
 
 
 

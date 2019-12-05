@@ -425,7 +425,7 @@ class AliDysms
     public function addSign($sign_name, $sign_source, $remark, $sign_file_list = [])
     {
         $this->setAction('AddSmsSign');
-        return $this->editSign($sign_name, $sign_source, $remark, $sign_file_list = []);
+        return $this->editSign($sign_name, $sign_source, $remark, $sign_file_list);
     }
 
     /**
@@ -459,7 +459,7 @@ class AliDysms
     public function modifySign($sign_name, $sign_source, $remark, $sign_file_list = [])
     {
         $this->setAction('ModifySmsSign');
-        return $this->editSign($sign_name, $sign_source, $remark, $sign_file_list = []);
+        return $this->editSign($sign_name, $sign_source, $remark, $sign_file_list);
     }
 
     /**
