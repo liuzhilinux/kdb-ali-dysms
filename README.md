@@ -391,5 +391,4 @@ AliDysms::getTemplate(string $template_code):array
 
 
 
-
-
+<p style="text-align:center;">Power By <a href="https://www.kuaidianban.com/" title="快点办">快点办</a></p>
