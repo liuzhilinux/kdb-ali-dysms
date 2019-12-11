@@ -99,7 +99,7 @@ class YunpianSms
      * @return mixed
      * @throws Exception
      */
-    private function post($data)
+    private function post($data = [])
     {
         $ch = curl_init();
 
@@ -229,6 +229,97 @@ class YunpianSms
             'mobile' => $mobile,
             'tpl_id' => $tpl_id,
             'tpl_value' => join('&', $tpl_value_tmp),
+        ]);
+    }
+
+    /**
+     * 指定短信模板 id 批量发送相同内容的短信给多个号码。
+     *
+     * @param string|array $mobiles 手机号，支持传入数组，字符串以英文逗号分隔。
+     * @param integer $tpl_id       短信模板 id ，必须为整型，其他类型将抛出类型错误的异常。
+     * @param array $tpl_value      变量名和变量值对，必须为数组类型，其他类型将抛出类型错误的异常。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function tplBatchSend($mobiles, $tpl_id, $tpl_value)
+    {
+        if (is_array($mobiles)) {
+            $mobiles = join(',', $mobiles);
+        }
+
+        if (!is_int($tpl_id)) {
+            throw new \Exception('$tpl_id must be integer!');
+        }
+
+        if (!is_array($tpl_value)) {
+            throw new \Exception('$tpl_value must be array!');
+        }
+
+        $tpl_value_tmp = [];
+
+        foreach ($tpl_value as $k => $v) {
+            $tpl_value_tmp[] = urlencode('#' . $k . '#') . '=' . urlencode($v);
+        }
+
+        return $this->path('sms', 'sms', 'tpl_batch_send')->post([
+            'mobile' => $mobiles,
+            'tpl_id' => $tpl_id,
+            'tpl_value' => join('&', $tpl_value_tmp),
+        ]);
+    }
+
+    /**
+     * 获取状态报告。
+     * 状态报告保存时间为72小时。
+     * 注意，已成功获取的数据将会删除，请妥善处理接口返回的数据。
+     *
+     * @param integer $page_size 每页个数，最大 100 个，默认 20 个。
+     * @param integer $page_num  页码，默认第 1 页。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function pullStatus($page_size = 20, $page_num = 1)
+    {
+        if (!is_int($page_size)) {
+            throw new \Exception('$page_size must be integer!');
+        }
+
+        if (!is_int($page_num)) {
+            throw new \Exception('$page_num must be integer!');
+        }
+
+        return $this->path('sms', 'sms', 'pull_status')->post([
+            'page_size' => $page_size,
+            'page_num' => $page_num,
+        ]);
+    }
+
+    /**
+     * 获取回复短信。
+     * 回复短信保存时间为72小时。
+     * 注意，已成功获取的数据将会删除，请妥善处理接口返回的数据。
+     *
+     * @param integer $page_size 每页个数，最大 100 个，默认 20 个。
+     * @param integer $page_num  页码，默认第 1 页。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function pullReply($page_size = 20, $page_num = 1)
+    {
+        if (!is_int($page_size)) {
+            throw new \Exception('$page_size must be integer!');
+        }
+
+        if (!is_int($page_num)) {
+            throw new \Exception('$page_num must be integer!');
+        }
+
+        return $this->path('sms', 'sms', 'pull_reply')->post([
+            'page_size' => $page_size,
+            'page_num' => $page_num,
         ]);
     }
 }

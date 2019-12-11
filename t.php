@@ -15,7 +15,7 @@ try {
 
     $sms = new YunpianSms($apikey);
 
-    $res = $sms->tplSingleSend('13812341234', 3353636, ['code' => 'abcd']);
+    $res = $sms->pullStatus();
 
     var_dump($res);
 } catch (Exception $exception) {
