@@ -164,8 +164,8 @@ class YunpianSms
     /**
      * 单条发送短信。
      *
-     * @param string $mobile 目标手机号码。
-     * @param string $text   短信内容。
+     * @param string $mobile 接收的手机号，仅支持单号码发送，不需要带+86 前缀。
+     * @param string $text   需要发送的短信内容，需要与已审核的短信模板相匹配。
      *
      * @return mixed
      * @throws Exception
@@ -181,8 +181,8 @@ class YunpianSms
     /**
      * 批量发送相同内容的短信给多个号码。
      *
-     * @param string|array $mobiles 手机号，支持传入数组，字符串以英文逗号分隔。
-     * @param string $text          短信内容。
+     * @param string|array $mobiles 接收的手机号，支持传入数组，字符串以英文逗号分隔。建议单次提交 200 个手机号以内，不要超过 1000 个，不需要带+86 前缀。
+     * @param string $text          需要发送的短信内容，需要与已审核的短信模板相匹配。
      *
      * @return mixed
      * @throws Exception
@@ -202,7 +202,7 @@ class YunpianSms
     /**
      * 指定短信模板 id 单发短信。
      *
-     * @param string $mobile   目标手机号码。
+     * @param string $mobile   接收的手机号，不需要带+86 前缀	。
      * @param integer $tpl_id  短信模板 id ，必须为整型，其他类型将抛出类型错误的异常。
      * @param array $tpl_value 变量名和变量值对，必须为数组类型，其他类型将抛出类型错误的异常。
      *
