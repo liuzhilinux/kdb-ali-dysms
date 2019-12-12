@@ -272,6 +272,7 @@ class YunpianSms
     /**
      * 获取状态报告。
      * 状态报告保存时间为72小时。
+     * 不可指定页码，可以通过多次获取数据，当最终获取的数据为空则表示没有数据。
      * 注意，已成功获取的数据将会删除，请妥善处理接口返回的数据。
      *
      * @param integer $page_size 每页个数，最大 100 个，默认 20 个。
@@ -299,6 +300,7 @@ class YunpianSms
     /**
      * 获取回复短信。
      * 回复短信保存时间为72小时。
+     * 不可指定页码，可以通过多次获取数据，当最终获取的数据为空则表示没有数据。
      * 注意，已成功获取的数据将会删除，请妥善处理接口返回的数据。
      *
      * @param integer $page_size 每页个数，最大 100 个，默认 20 个。
@@ -321,6 +323,118 @@ class YunpianSms
             'page_size' => $page_size,
             'page_num' => $page_num,
         ]);
+    }
+
+    /**
+     * 添加模版。
+     *
+     * @param string $tpl_content       模板内容，必须以带符号【】的签名开头。
+     * @param integer $notify_type      审核结果短信通知的方式:
+     *
+     *                                      0 表示需要通知,默认;
+     *                                      1 表示仅审核不通过时通知;
+     *                                      2 表示仅审核通过时通知;
+     *                                      3 表示不需要通知。
+     *
+     * @param string $website           验证码类模板对应的官网注册页面，验证码类模板必填。
+     * @param integer $tpl_type         1 代表验证码类模板，验证码类模板必填。
+     * @param string $apply_description 说明模板的发送场景和对象。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function addTpl($tpl_content, $notify_type = 0, $website = '', $tpl_type = 0, $apply_description = '')
+    {
+        if (!is_int($notify_type)) {
+            throw new \Exception('$notify_type must be integer!');
+        }
+
+        if (!is_int($tpl_type)) {
+            throw new \Exception('$tpl_type must be integer!');
+        }
+
+        $data = [
+            'tpl_content' => $tpl_content,
+            'notify_type' => $notify_type,
+            'apply_description' => $apply_description,
+        ];
+
+        if (1 === $tpl_type && !empty($website)) {
+            $data['website'] = $website;
+            $data['tplType'] = $tpl_type;
+        }
+
+        return $this->path('sms', 'tpl', 'add')->post($data);
+    }
+
+    /**
+     * 获取模板。
+     *
+     * @param integer $tpl_id 模板id。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function getTpl($tpl_id)
+    {
+        if (!is_int($tpl_id)) {
+            throw new \Exception('$tpl_id must be integer!');
+        }
+
+        return $this->path('sms', 'tpl', 'get')->post(['tpl_id' => $tpl_id]);
+    }
+
+    /**
+     * 修改模版。
+     *
+     * @param integer $tpl_id           模板id。
+     * @param string $tpl_content       模板内容，必须以带符号【】的签名开头。
+     * @param string $website           验证码类模板对应的官网注册页面，验证码类模板必填。
+     * @param integer $tpl_type         1 代表验证码类模板，验证码类模板必填。
+     * @param string $apply_description 说明模板的发送场景和对象。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function updateTpl($tpl_id, $tpl_content, $website = '', $tpl_type = 0, $apply_description = '')
+    {
+        if (!is_int($tpl_id)) {
+            throw new \Exception('$tpl_id must be integer!');
+        }
+
+        if (!is_int($tpl_type)) {
+            throw new \Exception('$tpl_type must be integer!');
+        }
+
+        $data = [
+            'tpl_id' => $tpl_id,
+            'tpl_content' => $tpl_content,
+            'apply_description' => $apply_description,
+        ];
+
+        if (1 === $tpl_type && !empty($website)) {
+            $data['website'] = $website;
+            $data['tplType'] = $tpl_type;
+        }
+
+        return $this->path('sms', 'tpl', 'update')->post($data);
+    }
+
+    /**
+     * 删除模板。
+     *
+     * @param integer $tpl_id 模板id。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function delTpl($tpl_id)
+    {
+        if (!is_int($tpl_id)) {
+            throw new \Exception('$tpl_id must be integer!');
+        }
+
+        return $this->path('sms', 'tpl', 'del')->post(['tpl_id' => $tpl_id]);
     }
 }
 
