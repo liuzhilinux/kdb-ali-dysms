@@ -202,7 +202,7 @@ class YunpianSms
     /**
      * 指定短信模板 id 单发短信。
      *
-     * @param string $mobile   接收的手机号，不需要带+86 前缀	。
+     * @param string $mobile   接收的手机号，不需要带+86 前缀    。
      * @param integer $tpl_id  短信模板 id ，必须为整型，其他类型将抛出类型错误的异常。
      * @param array $tpl_value 变量名和变量值对，必须为数组类型，其他类型将抛出类型错误的异常。
      *
@@ -557,6 +557,83 @@ class YunpianSms
         }
 
         return $this->path('sms', 'sign', 'update')->post($data);
+    }
+
+    /**
+     * 查短信发送记录。
+     *
+     * @param integer|string $start_time 短信发送开始时间，支持任意格式。
+     * @param integer|string $end_time   短信发送结束时间，支持任意格式。
+     * @param int $page_num              页码，默认值为 1 。
+     * @param int $page_size             每页个数，最大 100 个，默认值为 20 。
+     * @param string $mobile             需要查询的手机号。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function getRecord($start_time, $end_time, $page_num = 1, $page_size = 20, $mobile = '')
+    {
+        if (!is_int($page_num)) {
+            throw new \Exception('$page_num must be integer!');
+        }
+
+        if (!is_int($page_size)) {
+            throw new \Exception('$page_size must be integer!');
+        }
+
+        $start_time = is_int($start_time) ? date('Y-m-d H:i:s', $start_time) : date('Y-m-d H:i:s', strtotime($start_time));
+        $end_time = is_int($end_time) ? date('Y-m-d H:i:s', $end_time) : date('Y-m-d H:i:s', strtotime($end_time));
+
+        $data = [
+            'start_time' => $start_time,
+            'end_time' => $end_time,
+            'page_num' => $page_num,
+            'page_size' => $page_size
+        ];
+
+        if (!empty($mobile)) {
+            $data['mobile'] = $mobile;
+        }
+
+        return $this->path('sms', 'sms', 'get_record')->post($data);
+    }
+
+    /**
+     * 查账户信息。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function getUserInfo()
+    {
+        return $this->path('sms', 'user', 'get')->post();
+    }
+
+    /**
+     * 修改账号信息。
+     *
+     * @param null|string $emergency_contact 紧急联系人。
+     * @param null|string $emergency_mobile  紧急联系人手机号。
+     * @param null|string $alarm_balance     短信余额提醒阈值。 一天只提示一次。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function setUserInfo($emergency_contact = null, $emergency_mobile = null, $alarm_balance = null)
+    {
+        $data = [];
+
+        foreach (['emergency_contact', 'emergency_mobile', 'alarm_balance'] as $k) {
+            if (!empty($$k)) {
+                $data[$k] = $$k;
+            }
+        }
+
+        if (count($data) <= 0) {
+            throw new \Exception('At least one parameter required is not empty!');
+        }
+
+        return $this->path('sms', 'user', 'set')->post($data);
     }
 }
 
