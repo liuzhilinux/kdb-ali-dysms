@@ -436,5 +436,127 @@ class YunpianSms
 
         return $this->path('sms', 'tpl', 'del')->post(['tpl_id' => $tpl_id]);
     }
+
+    /**
+     * 添加签名。
+     *
+     * @param string $sign           签名内容，不能包含【】，3-8 个字，不能是纯英文和数字。
+     * @param bool $notify           是否短信通知结果，默认 true 。
+     * @param bool $apply_vip        是否申请专用通道，默认 false 。
+     * @param string $industry_type  所属行业，默认“其它”，可选项(必须完全一致，枚举值如下：
+     *
+     *                                  1. 游戏;
+     *                                  2. 移动应用;
+     *                                  3. 视频;
+     *                                  4. IT/通信/电子服务;
+     *                                  5. 电子商务;
+     *                                  6. 金融;
+     *                                  7. 网站;
+     *                                  8. 商业服务;
+     *                                  9. 房地产/建筑;
+     *                                  10. 零售/租赁/贸易;
+     *                                  11. 生产/加工/制造;
+     *                                  12. 交通/物流;
+     *                                  13. 文化传媒;
+     *                                  14. 能源/电气;
+     *                                  15. 政府企业;
+     *                                  16. 农业;
+     *                                  17. 物联网;
+     *                                  18. 其它。
+     *
+     * @param string $license_url    签名对应的营业执照或其他企业资质的图片文件 URL，
+     * @param string $license_base64 签名对应的资质图片进行 base64 编码格式转换后的字符串。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function addSign($sign, $notify = true, $apply_vip = false, $industry_type = '', $license_url = '', $license_base64 = '')
+    {
+        $data = ['sign' => $sign];
+
+        foreach (['notify', 'apply_vip'] as $k) {
+            if ($$k) {
+                $data[$k] = true;
+            }
+        }
+
+        foreach (['industry_type', 'license_url', 'license_base64'] as $k) {
+            if (!empty($$k)) {
+                $data[$k] = $$k;
+            }
+        }
+
+        return $this->path('sms', 'sign', 'add')->post($data);
+    }
+
+    /**
+     * 获取签名。
+     *
+     * @param string $sign   返回所有包含该内容的签名（模糊匹配），若要获取指定签名可加上符号，如【云片网】。
+     * @param int $page_num  页码，1 开始，不带或者格式错误返回全部。
+     * @param int $page_size 返回条数，必须大于 0 ，不带或者格式错误返回全部。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function getSign($sign = '', $page_num = 0, $page_size = 0)
+    {
+        if (!is_int($page_num)) {
+            throw new \Exception('$page_num must be integer!');
+        }
+
+        if (!is_int($page_size)) {
+            throw new \Exception('$page_size must be integer!');
+        }
+
+        $data = [];
+
+        if (!empty($sign)) {
+            $data['sign'] = $sign;
+        }
+
+        if ($page_num > 0) {
+            $data['page_num'] = $page_num;
+        }
+
+        if ($page_size > 0) {
+            $data['page_size'] = $page_size;
+        }
+
+        return $this->path('sms', 'sign', 'get')->post($data);
+    }
+
+    /**
+     * 修改签名。
+     *
+     * @param string $old_sign       完整签名内容，用于指定修改哪个签名，可以加【】也可不加。
+     * @param string $sign           修改后签名内容，不带【】，无此参数表示不修改。
+     * @param bool $notify           是否短信通知结果，默认 true 。
+     * @param bool $apply_vip        是否申请专用通道，默认 false 。
+     * @param string $industry_type  所属行业，默认“其它”，可选项(必须完全一致
+     * @param string $license_url    签名对应的营业执照或其他企业资质的图片文件 URL，
+     * @param string $license_base64 签名对应的资质图片进行 base64 编码格式转换后的字符串。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function updateSign($old_sign, $sign = '', $notify = true, $apply_vip = false, $industry_type = '', $license_url = '', $license_base64 = '')
+    {
+        $data = ['old_sign' => $old_sign];
+
+        foreach (['notify', 'apply_vip'] as $k) {
+            if ($$k) {
+                $data[$k] = true;
+            }
+        }
+
+        foreach (['sign', 'industry_type', 'license_url', 'license_base64'] as $k) {
+            if (!empty($$k)) {
+                $data[$k] = $$k;
+            }
+        }
+
+        return $this->path('sms', 'sign', 'update')->post($data);
+    }
 }
 

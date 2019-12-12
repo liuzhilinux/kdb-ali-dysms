@@ -15,7 +15,7 @@ try {
 
     $sms = new YunpianSms($apikey);
 
-    $res = $sms->getTpl(3371152);
+    $res = $sms->getSign();
 
     var_dump($res);
 } catch (Exception $exception) {
