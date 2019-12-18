@@ -15,13 +15,13 @@ AliDysms - 一个轻量的阿里云短信服务对接模块，内部封装有 `C
 
 * 官方文档：[ 短信服务-阿里云 ]( https://help.aliyun.com/product/44282.html, "短信服务-阿里云-官方文档")
 * 在线调试：[OpenAPI Explorer]( https://api.aliyun.com/?spm=a2c4g.11186623.2.13.2fe04e6akedeOC#/?product=Dysmsapi&lang=PHP, "OpenAPI Explorer")
-* 官方 PHP SDK：[aliyun/openapi-sdk-php-client: Official repository of the Alibaba Cloud Client for PHP]( https://github.com/aliyun/openapi-sdk-php-client, "新版 SDK")
-* 旧版 PHP SDK：[ aliyun/aliyun-openapi-php-sdk: Open API SDK for php developers ]( https://github.com/aliyun/aliyun-openapi-php-sdk, "旧版 SDK")
+* 官方 PHP SDK ：[aliyun/openapi-sdk-php-client: Official repository of the Alibaba Cloud Client for PHP]( https://github.com/aliyun/openapi-sdk-php-client, "新版 SDK")
+* 旧版 PHP SDK ：[ aliyun/aliyun-openapi-php-sdk: Open API SDK for php developers ]( https://github.com/aliyun/aliyun-openapi-php-sdk, "旧版 SDK")
 
 ### 云片
 
-* 
-* 
+* 官方文档：[文档_云片](https://www.yunpian.com/dev-doc, "文档_云片") 或 [介绍_短信接口API文档－云片短信平台](https://www.yunpian.com/doc/zh_CN/, "介绍_短信接口API文档－云片短信平台")
+* 官方 PHP SDK ：[yunpian/yunpian-php-sdk: The https://www.yunpian.com php sdk.](https://github.com/yunpian/yunpian-php-sdk, "PHP SDK")
 
 ## 开始使用
 
@@ -386,6 +386,152 @@ AliDysms::modifyTemplate(
 ```php
 AliDysms::getTemplate(string $template_code):array
 ```
+
+
+
+
+
+## 云片方案
+
+### 基本使用
+
+#### 基本配置
+
+同样的，你可以通过 `YunpianSms` 的构造函数初始化配置，像这样：
+
+```php
+    public function __construct($apikey = null, $protocol = null, $format = null)
+    {
+        if ($apikey) {
+            $this->apikey = $apikey;
+        } else $this->apikey = C('YUNPIAN.API_KEY');
+
+        // ...
+    }
+```
+
+这样，你就可以直接 `new` 一个对象，用这个对象句柄进行下一步的操作了。
+
+或者，你可以这样：
+
+```php
+$apikey = $cfg['apikey'];
+$sms = new YunpianSms($apikey);
+```
+
+可以动态配置云片的 `apikey` 。
+
+#### 发送单条短信
+
+如果你已经指定了待发送的短信内容，可以通过下面这个接口发送短信：
+
+```php
+try {
+    $apikey = $cfg['apikey'];
+
+    $sms = new YunpianSms($apikey);
+
+    $content = '【快点办】您的验证码是1234，如非本人操作，请忽略本短信。';
+    $res = $sms->singleSend('13812341234', $content);
+
+    var_dump($res);
+} catch (Exception $exception) {
+    echo 'Code: ', $exception->getCode(), "\n";
+    echo 'Error: ', $exception->getMessage(), "\n";
+}
+```
+
+看到这里，你也许会想，发个短信，还要指定短信的内容，如果能通过指定短信模板的 ID 就可以发送短信那就好了，所以我们封装了另一个接口，同样的需求，代码可以简化如下：
+
+```php
+try {
+    $apikey = $cfg['apikey'];
+
+    $sms = new YunpianSms($apikey);
+
+    $res = $sms->tplSingleSend('13812341234', 1234567, ['code', '1234']);
+
+    var_dump($res);
+} catch (Exception $exception) {
+    echo 'Code: ', $exception->getCode(), "\n";
+    echo 'Error: ', $exception->getMessage(), "\n";
+}
+```
+
+
+
+#### 发送多条短信
+
+当然，我们也可以发送相同内容的短信给多个号码：
+
+```php
+// 指定短信内容。
+$content = '【快点办】短信内容~';
+$mobiles = '13812341234,15812341234';
+$res = $sms->batchSend($mobiles, $content);
+
+// 当然可以把多个号码打包成数组。
+$mobiles = ['13812341234', '15812341234'];
+$res = $sms->batchSend($mobiles, $content);
+
+// 指定短信模板。
+$tpl_id = 1234567;
+$res = $sms->tplBatchSend($mobiles, $tpl_id, ['code' => '1234']);
+```
+
+
+
+#### 通用方法
+
+当然，有一个更简单的接口调用方法：
+
+```php
+try {
+    $apikey = $cfg['apikey'];
+
+    $sms = new YunpianSms($apikey);
+
+    // 指定内容单发短信。
+    $mobile = '13812341234';
+    $content = '【快点办】短信内容。';
+    $res = $sms->send($mobile, $content);
+
+    // 指定内容群发短信。
+    $mobile = '13812341234,15812341234';
+    $content = '【快点办】短信内容。';
+    $res = $sms->send($mobile, $content);
+
+    // 或者手机号码传入数组。
+    $mobile = ['13812341234', '15812341234'];
+    $content = '【快点办】短信内容。';
+    $res = $sms->send($mobile, $content);
+
+    // 指定模板单发。
+    $mobile = '13812341234';
+    $tpl_id = 1234567;
+    $res = $sms->send($mobile, $tpl_id);
+    // 带参数
+    $res = $sms->send($mobile, $tpl_id, ['key' => 'val']);
+
+    // 指定模板群发。
+    $mobile = ['13812341234', '15812341234'];
+    $tpl_id = 1234567;
+    $res = $sms->send($mobile, $tpl_id, ['key' => 'val']);
+
+    var_dump($res);
+} catch (Exception $exception) {
+    echo 'Code: ', $exception->getCode(), "\n";
+    echo 'Error: ', $exception->getMessage(), "\n";
+}
+```
+
+
+
+
+
+
+
+
 
 
 

@@ -635,5 +635,41 @@ class YunpianSms
 
         return $this->path('sms', 'user', 'set')->post($data);
     }
+
+    /**
+     * 发送短信 - 通用方法。
+     *
+     * @param string|array $mobiles 手机号码，多个号码以英文逗号分隔，或打包成数组。
+     * @param int|string $contents  短信内容或模板 id 。
+     * @param array $params         变量名和变量值对，必须为数组类型，其他类型将抛出类型错误的异常。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function send($mobiles, $contents, $params = [])
+    {
+        if (!is_array($params)) {
+            throw new \Exception('$params must be array!');
+        }
+
+        if (is_array($mobiles)) {
+            $mobiles = join(',', $mobiles);
+        }
+
+        $is_batch_send = strpos($mobiles, ',') !== false;
+
+        if (is_numeric($contents)) {
+            $contents = intval($contents);
+
+            return $is_batch_send ?
+                $this->tplBatchSend($mobiles, $contents, $params) :
+                $this->tplSingleSend($mobiles, $contents, $params);
+
+        } else {
+            return $is_batch_send ?
+                $this->singleSend($mobiles, $contents) :
+                $this->batchSend($mobiles, $contents);
+        }
+    }
 }
 
