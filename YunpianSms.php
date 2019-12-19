@@ -46,9 +46,14 @@ class YunpianSms
     private $format = 'json';
 
     /**
-     * @var array 响应结果。
+     * @var string 短信验证码模板 id 。
      */
-    private $result;
+    private $verifyPhoneTplId;
+
+    /**
+     * @var string 短信验证码参数字段。
+     */
+    private $verifyPhoneCodeField;
 
     /**
      * 初始化云片短信模块。
@@ -71,6 +76,9 @@ class YunpianSms
         if ($format) {
             $this->format = $format;
         }
+
+        // $this->verifyPhoneTplId = '';
+        // $this->verifyPhoneCodeField = '';
     }
 
     /**
@@ -670,6 +678,38 @@ class YunpianSms
                 $this->singleSend($mobiles, $contents) :
                 $this->batchSend($mobiles, $contents);
         }
+    }
+
+    /**
+     * 发送短信验证码。
+     *
+     * @param string $mobile    接收短信验证码的手机号。
+     * @param int $digit        验证码位数。
+     * @param null $verify_code 验证码。
+     * @param null $tpl_id      短信模板 id 。
+     * @param null $field       验证码参数字段。
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function sendVerifyCode($mobile, $digit = 6, $verify_code = null, $tpl_id = null, $field = null)
+    {
+        if (!empty($verify_code)) {
+            $verify_code = '';
+
+            for ($i = 0; $i < intval($digit); $i++) $verify_code .= mt_rand(0, 9);
+        }
+
+        if (empty($tpl_id)) $tpl_id = $this->verifyPhoneTplId;
+
+        if (empty($field)) $field = $this->verifyPhoneCodeField;
+
+        $res = $this->tplSingleSend($mobile, $tpl_id, [$field => $verify_code]);
+
+        $res['mobile'] = $mobile;
+        $res['verify_code'] = $verify_code;
+
+        return $res;
     }
 }
 

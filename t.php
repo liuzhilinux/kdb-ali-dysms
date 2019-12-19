@@ -15,32 +15,12 @@ try {
 
     $sms = new YunpianSms($apikey);
 
-    // 指定内容单发短信。
-    $mobile = '13812341234';
-    $content = '【快点办】短信内容。';
-    $res = $sms->send($mobile, $content);
+    $res = $sms->sendVerifyCode('13812341234');
 
-    // 指定内容群发短信。
-    $mobile = '13812341234,15812341234';
-    $content = '【快点办】短信内容。';
-    $res = $sms->send($mobile, $content);
-
-    // 或者手机号码传入数组。
-    $mobile = ['13812341234', '15812341234'];
-    $content = '【快点办】短信内容。';
-    $res = $sms->send($mobile, $content);
-
-    // 指定模板单发。
-    $mobile = '13812341234';
-    $tpl_id = 1234567;
-    $res = $sms->send($mobile, $tpl_id);
-    // 带参数
-    $res = $sms->send($mobile, $tpl_id, ['key' => 'val']);
-
-    // 指定模板群发。
-    $mobile = ['13812341234', '15812341234'];
-    $tpl_id = 1234567;
-    $res = $sms->send($mobile, $tpl_id, ['key' => 'val']);
+    // 手机号码。
+    $mobile = $res['mobile'];
+    // 生成的验证码。
+    $verify_code = $res['verify_code'];
 
     var_dump($res);
 } catch (Exception $exception) {

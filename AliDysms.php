@@ -306,24 +306,31 @@ class AliDysms
     /**
      * 发送短信验证码。
      *
-     * @param string $phone_number 手机号码。
-     * @param int $digit           短信验证码位数，默认 6 位。
+     * @param string $phone_number  手机号码。
+     * @param int $digit            短信验证码位数，默认 6 位。
+     * @param string $verify_code   验证码。
+     * @param string $template_code 短信模板 id 。
+     * @param  string $field        验证码参数字段。
      *
      * @return bool|mixed|string
      * @throws \Exception
      */
-    public function sendVerifyCode($phone_number, $digit = 6)
+    public function sendVerifyCode($phone_number, $digit = 6, $verify_code = null, $template_code = null, $field = null)
     {
         // 生成指定位数的短信验证码。
-        $verify_code = '';
+        if (empty($verify_code)) {
+            $verify_code = '';
 
-        for ($i = 0; $i < intval($digit); $i++) $verify_code .= mt_rand(0, 9);
+            for ($i = 0; $i < intval($digit); $i++) $verify_code .= mt_rand(0, 9);
+        }
 
+        $template_code = empty($template_code) ? $this->verifyPhoneTemplateCode : $template_code;
+        $field = empty($field) ? $this->verifyPhoneTemplateField : $field;
 
         $response = $this->send(
             $phone_number,
-            $this->verifyPhoneTemplateCode,
-            [$this->verifyPhoneTemplateField => $verify_code]
+            $template_code,
+            [$field => $verify_code]
         );
 
         if ($response['code'] === 'OK' && $response['message'] === 'OK') {

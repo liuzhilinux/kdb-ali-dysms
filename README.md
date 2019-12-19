@@ -527,6 +527,14 @@ try {
 
 
 
+#### 快捷发送短信验证码
+
+```
+
+```
+
+
+
 
 
 
@@ -538,3 +546,4 @@ try {
 
 
 <p style="text-align:center;">Power By <a href="https://www.kuaidianban.com/" title="快点办">快点办</a></p>
+
