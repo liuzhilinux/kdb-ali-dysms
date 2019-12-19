@@ -211,7 +211,7 @@ class YunpianSms
      * 指定短信模板 id 单发短信。
      *
      * @param string $mobile   接收的手机号，不需要带+86 前缀    。
-     * @param integer $tpl_id  短信模板 id ，必须为整型，其他类型将抛出类型错误的异常。
+     * @param int $tpl_id      短信模板 id ，必须为整型，其他类型将抛出类型错误的异常。
      * @param array $tpl_value 变量名和变量值对，必须为数组类型，其他类型将抛出类型错误的异常。
      *
      * @return mixed
@@ -244,7 +244,7 @@ class YunpianSms
      * 指定短信模板 id 批量发送相同内容的短信给多个号码。
      *
      * @param string|array $mobiles 手机号，支持传入数组，字符串以英文逗号分隔。
-     * @param integer $tpl_id       短信模板 id ，必须为整型，其他类型将抛出类型错误的异常。
+     * @param int $tpl_id           短信模板 id ，必须为整型，其他类型将抛出类型错误的异常。
      * @param array $tpl_value      变量名和变量值对，必须为数组类型，其他类型将抛出类型错误的异常。
      *
      * @return mixed
@@ -283,8 +283,8 @@ class YunpianSms
      * 不可指定页码，可以通过多次获取数据，当最终获取的数据为空则表示没有数据。
      * 注意，已成功获取的数据将会删除，请妥善处理接口返回的数据。
      *
-     * @param integer $page_size 每页个数，最大 100 个，默认 20 个。
-     * @param integer $page_num  页码，默认第 1 页。
+     * @param int $page_size 每页个数，最大 100 个，默认 20 个。
+     * @param int $page_num  页码，默认第 1 页。
      *
      * @return mixed
      * @throws Exception
@@ -311,8 +311,8 @@ class YunpianSms
      * 不可指定页码，可以通过多次获取数据，当最终获取的数据为空则表示没有数据。
      * 注意，已成功获取的数据将会删除，请妥善处理接口返回的数据。
      *
-     * @param integer $page_size 每页个数，最大 100 个，默认 20 个。
-     * @param integer $page_num  页码，默认第 1 页。
+     * @param int $page_size 每页个数，最大 100 个，默认 20 个。
+     * @param int $page_num  页码，默认第 1 页。
      *
      * @return mixed
      * @throws Exception
@@ -337,7 +337,7 @@ class YunpianSms
      * 添加模版。
      *
      * @param string $tpl_content       模板内容，必须以带符号【】的签名开头。
-     * @param integer $notify_type      审核结果短信通知的方式:
+     * @param int $notify_type          审核结果短信通知的方式:
      *
      *                                      0 表示需要通知,默认;
      *                                      1 表示仅审核不通过时通知;
@@ -345,7 +345,7 @@ class YunpianSms
      *                                      3 表示不需要通知。
      *
      * @param string $website           验证码类模板对应的官网注册页面，验证码类模板必填。
-     * @param integer $tpl_type         1 代表验证码类模板，验证码类模板必填。
+     * @param int $tpl_type             1 代表验证码类模板，验证码类模板必填。
      * @param string $apply_description 说明模板的发送场景和对象。
      *
      * @return mixed
@@ -378,7 +378,7 @@ class YunpianSms
     /**
      * 获取模板。
      *
-     * @param integer $tpl_id 模板id。
+     * @param int $tpl_id 模板 id 。
      *
      * @return mixed
      * @throws Exception
@@ -395,10 +395,10 @@ class YunpianSms
     /**
      * 修改模版。
      *
-     * @param integer $tpl_id           模板id。
+     * @param int $tpl_id               模板id。
      * @param string $tpl_content       模板内容，必须以带符号【】的签名开头。
      * @param string $website           验证码类模板对应的官网注册页面，验证码类模板必填。
-     * @param integer $tpl_type         1 代表验证码类模板，验证码类模板必填。
+     * @param int $tpl_type             1 代表验证码类模板，验证码类模板必填。
      * @param string $apply_description 说明模板的发送场景和对象。
      *
      * @return mixed
@@ -431,7 +431,7 @@ class YunpianSms
     /**
      * 删除模板。
      *
-     * @param integer $tpl_id 模板id。
+     * @param int $tpl_id 模板id。
      *
      * @return mixed
      * @throws Exception
@@ -472,7 +472,7 @@ class YunpianSms
      *                                  17. 物联网;
      *                                  18. 其它。
      *
-     * @param string $license_url    签名对应的营业执照或其他企业资质的图片文件 URL，
+     * @param string $license_url    签名对应的营业执照或其他企业资质的图片文件 URL 。
      * @param string $license_base64 签名对应的资质图片进行 base64 编码格式转换后的字符串。
      *
      * @return mixed
@@ -570,11 +570,11 @@ class YunpianSms
     /**
      * 查短信发送记录。
      *
-     * @param integer|string $start_time 短信发送开始时间，支持任意格式。
-     * @param integer|string $end_time   短信发送结束时间，支持任意格式。
-     * @param int $page_num              页码，默认值为 1 。
-     * @param int $page_size             每页个数，最大 100 个，默认值为 20 。
-     * @param string $mobile             需要查询的手机号。
+     * @param int|string $start_time 短信发送开始时间，支持任意格式。
+     * @param int|string $end_time   短信发送结束时间，支持任意格式。
+     * @param int $page_num          页码，默认值为 1 。
+     * @param int $page_size         每页个数，最大 100 个，默认值为 20 。
+     * @param string $mobile         需要查询的手机号。
      *
      * @return mixed
      * @throws Exception

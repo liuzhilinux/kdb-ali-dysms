@@ -20,7 +20,7 @@ AliDysms - 一个轻量的阿里云短信服务对接模块，内部封装有 `C
 
 ### 云片
 
-* 官方文档：[文档_云片](https://www.yunpian.com/dev-doc, "文档_云片") 或 [介绍_短信接口API文档－云片短信平台](https://www.yunpian.com/doc/zh_CN/, "介绍_短信接口API文档－云片短信平台")
+* 官方文档：[文档_云片](https://www.yunpian.com/dev-doc, "文档_云片") 或 [短信接口(API)_语音验证码接口_国际短信接口－云片网](https://www.yunpian.com/api2.0/guide.html, "介绍_短信接口API文档－云片短信平台")
 * 官方 PHP SDK ：[yunpian/yunpian-php-sdk: The https://www.yunpian.com php sdk.](https://github.com/yunpian/yunpian-php-sdk, "PHP SDK")
 
 ## 开始使用
@@ -62,7 +62,7 @@ namespace Common\Model;
         $this->accessKeySecret = C('ALI_DYSMS.ACCESS_KEY_SECRET');
         // $this->verifyPhoneTemplateCode = '';
         // $this->verifyPhoneTemplateField = '';
-		
+
         // ...
     }
 ```
@@ -267,7 +267,7 @@ try {
     // 默认值为第一页，每页 10 条。
     $result = $sms->getDetails('13812341234', '20191127', 2, 50);
 
-	// 如果有保存 BizId ,可以补充在最后，表示查询某个批次的记录。
+    // 如果有保存 BizId ,可以补充在最后，表示查询某个批次的记录。
     $result = $sms->getDetails('13812341234', '20191127', 1, 10, '123456^123');
 
 } catch (Exception $exception) {
@@ -529,8 +529,179 @@ try {
 
 #### 快捷发送短信验证码
 
+```php
+try {
+    $apikey = $cfg['apikey'];
+
+    $sms = new YunpianSms($apikey);
+
+    $res = $sms->sendVerifyCode('13812341234');
+
+    // 手机号码。
+    $mobile = $res['mobile'];
+    // 生成的验证码。
+    $verify_code = $res['verify_code'];
+
+    var_dump($res);
+} catch (Exception $exception) {
+    echo 'Code: ', $exception->getCode(), "\n";
+    echo 'Error: ', $exception->getMessage(), "\n";
+}
 ```
 
+
+
+### 接口汇总
+
+#### 发送短信
+
+##### 指定内容发送单条短信
+
+```php
+YunpianSms::singleSend(string $mobile, string $text):array
+```
+
+##### 指定内容群发短信
+
+```php
+YunpianSms::batchSend(string|array $mobiles, string $text):array
+```
+
+##### 指定模板 ID 发送单条短信
+
+```php
+YunpianSms::tplSingleSend(
+    string $mobile,    // 手机号码，英文逗号分隔，支持传入数组
+    int $tpl_id,       // 短信模板 ID
+    array $tpl_value   // 短信参数键值对
+):array
+```
+
+##### 指定模板 ID 群发短信
+
+```php
+YunpianSms::tplBatchSend(string|array $mobiles, int $tpl_id, array $tpl_value):array
+```
+
+##### 拉取状态报告
+
+```php
+YunpianSms::pullStatus([int $page_size = 20, int $page_num = 1]):array
+```
+
+##### 拉取回复短信
+
+```php
+YunpianSms::pullReply([int $page_size = 20, int $page_num = 1]):array
+```
+
+
+
+#### 短信模板相关
+
+##### 添加模板
+
+```php
+YunpianSms::addTpl(
+    string $tpl_content	         // 模板内容
+    [, int $notify_type,          // 审核结果短信通知的方式
+    string $website,             // 验证码类模板对应的官网注册页面，验证码类模板必填
+    int $tpl_type,               // 1 代表验证码类模板，验证码类模板必填
+    string $apply_description]   // 说明模板的发送场景和对象
+):array
+```
+
+##### 获取模板详情
+
+```php
+YunpianSms::getTpl(int $tpl_id):array
+```
+
+##### 修改模版
+
+```php
+YunpianSms::updateTpl(
+    int $tpl_id                  // 模板 id
+    string $tpl_content
+    [, string $website,
+    int $tpl_type,
+    string $apply_description]
+):array
+```
+
+##### 删除模板
+
+```php
+YunpianSms::delTpl(int $tpl_id):array
+```
+
+#### 短信签名相关
+
+##### 添加签名
+
+```php
+YunpianSms::addSign(
+    string $sign               // 签名内容
+    [, bool $notify,           // 是否短信通知结果，默认 true
+    bool $apply_vip,           // 是否申请专用通道，默认 false
+    string $industry_type,     // 所属行业，默认“其它”，可选项(必须完全一致，枚举值如下
+    string $license_url,       // 签名对应的营业执照或其他企业资质的图片文件 URL 
+    string $license_base64]    // 签名对应的资质图片进行 base64 编码格式转换后的字符串
+):array
+```
+
+##### 获取签名详情
+
+```php
+YunpianSms::getSign(
+    [string $sign = '', 
+    int $page_num = 0, 
+    int $page_size = 0]
+):array
+```
+
+##### 修改签名
+
+```php
+YunpianSms::updateSign(
+    string $old_sign           // 完整签名内容，用于指定修改哪个签名
+    [, string $sign = '',
+    bool $notify = false, 
+    bool $apply_vip = false, 
+    string $industry_type = '', 
+    string $license_url = '', 
+    string $license_base64 = '']
+):array
+```
+
+#### 查短信发送记录
+
+```php
+YunpianSms::getRecord(
+    int|string $start_time,
+    int|string $end_time
+    [, int $page_num = 1, 
+    int $page_size = 20, 
+    string $mobile = '']
+):array
+```
+
+#### 用户账号相关
+
+##### 查账户信息
+
+```php
+YunpianSms::getUserInfo():array
+```
+
+##### 修改账号信息
+
+```php
+YunpianSms::setUserInfo(
+    [null|string $emergency_contact = null,  // 紧急联系人
+    null|string $emergency_mobile = null,    // 紧急联系人手机号
+    null|string $alarm_balance]              // 短信余额提醒阈值。 一天只提示一次
+):array
 ```
 
 
@@ -539,11 +710,4 @@ try {
 
 
 
-
-
-
-
-
-
-<p style="text-align:center;">Power By <a href="https://www.kuaidianban.com/" title="快点办">快点办</a></p>
-
+<p style="text-align:center;">Power&nbsp;By&nbsp;&nbsp;<a href="https://www.kuaidianban.com/" title="快点办">快点办</a></p>
